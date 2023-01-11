@@ -1,0 +1,113 @@
+#1 Create HBase Table :
+
+ create 'sales_data','order_det','product_det','customer_det'
+
+#2 Create Hive Table:
+ 
+create external table sales_data_hive (
+ordernum int,
+quantityord int,
+priceeach float,
+orderlinenum int,
+sales float,
+status string,
+qtr_id int,
+month_id int,
+yr_id int,
+productline string,
+msrp int,
+product_code string,
+phone string,
+city string,
+state string,
+postalcode string,
+country string,
+territory string,
+contactlastname string,
+contactfirstname string,
+dealsize string
+)
+row format delimited
+fields terminated by ','
+STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler'
+WITH SERDEPROPERTIES
+("hbase.columns.mapping"=" :ordernum,order_det:quantityord,order_det:priceeach,order_det:orderlinenum,order_det:sales,order_det:status,order_det:qtr_id,order_det:month_id,order_det:yr_id,product_det:productline,product_det:msrp,product_det:product_code,customer_det:phone,customer_det:city,customer_det:state,customer_det:postalcode,customer_det:country,customer_det:territory,customer_det:contactlastname,customer_det:contactfirstname,customer_det:dealsize")
+TBLPROPERTIES("hbase.table.name"="sales");
+
+#3 Create Hive Staging table :
+
+create external table sales_data_hive_stg (
+ordernum int,
+quantityordered int,
+priceeach float,
+orderlinenumber int,
+sales float,
+status string,
+qtr_id int,
+month_id int,
+year_id int,
+productline string,
+msrp int,
+product_code string,
+phone string,
+city string,
+state string,
+postalcode string,
+country string,
+territory string,
+contactlastname string,
+contactfirstname string,
+dealsize string
+)
+row format delimited
+fields terminated by ',' ;
+
+#4 Load data from local to Hive Staging table :
+
+load data local inpath '/home/cloudera/sales_data.csv' into table sales_data_hive_stg;
+
+#5 Load data into Hive external table from staging table :
+
+insert into table sales_data_hive select * from sales_data_hive_stg;
+
+#6 Use scan command in HBase to check data is available there or not :
+
+Scan 'sales_data'
+
+#7 Output of HBase shell :
+
+ 
+ 10300                                           column=customer details:city, timestamp=1667558999447, value=
+ 10300                                           column=customer details:contactfirstname, timestamp=1667558999447, value=Small
+ 10300                                           column=customer details:contactlastname, timestamp=1667558999447, value=Roland
+ 10300                                           column=customer details:country, timestamp=1667558999447, value=EMEA
+ 10300                                           column=customer details:phone, timestamp=1667558999447, value=Frankfurt
+ 10300                                           column=customer details:postalcode, timestamp=1667558999447, value=Germany
+ 10300                                           column=customer details:state, timestamp=1667558999447, value=60528
+ 10300                                           column=customer details:territory, timestamp=1667558999447, value=Keitel
+ 10300                                           column=order details:month_id, timestamp=1667558999447, value=2003
+ 10300                                           column=order details:orderlinenumber, timestamp=1667558999447, value=1822
+ 10300                                           column=order details:ordernum, timestamp=1667558999447, value=31
+ 10300                                           column=order details:priceeach, timestamp=1667558999447, value=4.0
+ 10300                                           column=order details:qtr_id, timestamp=1667558999447, value=10
+ 10300                                           column=order details:quantityordered, timestamp=1667558999447, value=58
+ 10300                                           column=order details:status, timestamp=1667558999447, value=4
+ 10300                                           column=product details:product_code, timestamp=1667558999447, value=+49 69 66 90 2555
+ 10300                                           column=product details:productline, timestamp=1667558999447, value=61
+ 10301                                           column=customer details:city, timestamp=1667558999447, value=
+ 10301                                           column=customer details:contactfirstname, timestamp=1667558999447, value=Large
+ 10301                                           column=customer details:contactlastname, timestamp=1667558999447, value=Jan
+ 10301                                           column=customer details:country, timestamp=1667558999447, value=EMEA
+ 10301                                           column=customer details:phone, timestamp=1667558999447, value=Oslo
+ 10301                                           column=customer details:postalcode, timestamp=1667558999447, value=Norway
+ 10301                                           column=customer details:state, timestamp=1667558999447, value=N 0106
+ 10301                                           column=customer details:territory, timestamp=1667558999447, value=Klaeboe
+ 10301                                           column=order details:month_id, timestamp=1667558999447, value=2003
+ 10301                                           column=order details:orderlinenumber, timestamp=1667558999447, value=7723
+ 10301                                           column=order details:ordernum, timestamp=1667558999447, value=50
+ 10301                                           column=order details:priceeach, timestamp=1667558999447, value=11.0
+ 10301                                           column=order details:qtr_id, timestamp=1667558999447, value=10
+ 10301                                           column=order details:quantityordered, timestamp=1667558999447, value=100
+ 10301                                           column=order details:status, timestamp=1667558999447, value=4
+ 10301                                           column=product details:product_code, timestamp=1667558999447, value=+47 2212 1555
+ 10301                                           column=product details:productline, timestamp=1667558999447, value=140
